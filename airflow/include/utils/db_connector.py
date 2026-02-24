@@ -8,12 +8,13 @@ class DatabaseConnector:
             try:
                 import streamlit as st
                 connection_string = (
-                    f"postgresql://{st.secrets['database']['user']}:"
-                    f"{st.secrets['database']['password']}@"
-                    f"{st.secrets['database']['host']}:"
-                    f"{st.secrets['database']['port']}/"
-                    f"{st.secrets['database']['database']}"
-                )
+                f"postgresql://{st.secrets['database']['user']}:"
+                f"{st.secrets['database']['password']}@"
+                f"{st.secrets['database']['host']}:"
+                f"{st.secrets['database']['port']}/"
+                f"{st.secrets['database']['database']}"
+                f"?sslmode={st.secrets['database']['sslmode']}"
+            )
             except Exception:
                 # Fallback (local dev)
                 connection_string = (
