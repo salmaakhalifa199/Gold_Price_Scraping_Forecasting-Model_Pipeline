@@ -6,12 +6,14 @@ import os
 class PostgresHandler:
     def __init__(self):
         self.conn = psycopg2.connect(
-            host="localhost",
-            port="5432",
-            database="gold_prices_db",
-            user="postgres",
-            password=os.getenv("DB_PASSWORD", "postgres")
+            host=os.getenv("DB_HOST", "localhost"),
+            port=os.getenv("DB_PORT", "5432"),
+            database=os.getenv("DB_NAME", "gold_prices_db"),
+            user=os.getenv("DB_USER", "postgres"),
+            password=os.getenv("DB_PASSWORD", "postgres"),
+            sslmode=os.getenv("DB_SSLMODE", "disable")
         )
+        self.conn.autocommit = True
         self.cursor = self.conn.cursor()
 
     def insert_gold_prices(self, data_list):

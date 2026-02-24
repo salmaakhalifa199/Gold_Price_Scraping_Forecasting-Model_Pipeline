@@ -36,11 +36,12 @@ logger = logging.getLogger(__name__)
 
 # ── DB connection params (shared across tasks) ────────────────────────────────
 DB_PARAMS = {
-    'host': 'host.docker.internal',
-    'port': 5432,
-    'database': 'gold_prices_db',
-    'user': 'postgres',
-    'password': 'postgres'
+    'host':     os.getenv('DB_HOST', 'host.docker.internal'),
+    'port':     int(os.getenv('DB_PORT', 5432)),
+    'database': os.getenv('DB_NAME', 'gold_prices_db'),
+    'user':     os.getenv('DB_USER', 'postgres'),
+    'password': os.getenv('DB_PASSWORD', 'postgres'),
+    'sslmode':  os.getenv('DB_SSLMODE', 'disable'),
 }
 
 # Default arguments for the DAG
