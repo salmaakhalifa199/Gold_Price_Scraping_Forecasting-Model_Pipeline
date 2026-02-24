@@ -54,8 +54,7 @@ st.markdown("""
 
 @st.cache_resource
 def get_db_connection():
-    """Initialize database connection with caching"""
-    return DatabaseConnector()
+    return DatabaseConnector()  # lightweight — no persistent conn inside
 
 
 @st.cache_data(ttl=300)
