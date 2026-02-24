@@ -8,13 +8,13 @@ class DatabaseConnector:
             try:
                 import streamlit as st
                 connection_string = (
-                f"postgresql://{st.secrets['database']['user']}:"
-                f"{st.secrets['database']['password']}@"
-                f"{st.secrets['database']['host']}:"
-                f"{st.secrets['database']['port']}/"
-                f"{st.secrets['database']['database']}"
-                f"?sslmode={st.secrets['database']['sslmode']}"
-            )
+                    f"postgresql://{st.secrets['database']['user']}:"
+                    f"{st.secrets['database']['password']}@"
+                    f"{st.secrets['database']['host']}:"
+                    f"{st.secrets['database']['port']}/"
+                    f"{st.secrets['database']['database']}"
+                    f"?sslmode={st.secrets['database']['sslmode']}"
+                )
             except Exception:
                 # Fallback (local dev)
                 connection_string = (
@@ -22,6 +22,17 @@ class DatabaseConnector:
                 )
 
         self.conn = psycopg2.connect(connection_string)
+        self.conn.autocommit = True  # Prevents transaction aborted state
+
+    def _execute_query(self, query, params=None):
+        """Safe query executor with automatic rollback on failure."""
+        try:
+            if params:
+                return pd.read_sql(query, self.conn, params=params)
+            return pd.read_sql(query, self.conn)
+        except Exception:
+            self.conn.rollback()
+            raise
 
     # =========================
     # Gold Prices
@@ -44,7 +55,7 @@ class DatabaseConnector:
             FROM gold_prices
             ORDER BY price_date
         """
-        df = pd.read_sql(query, self.conn)
+        df = self._execute_query(query)
         df["date"] = pd.to_datetime(df["date"])
         return df
 
@@ -67,10 +78,10 @@ class DatabaseConnector:
 
         if model_name:
             query = base_query + " WHERE model_name = %s ORDER BY forecast_date"
-            df = pd.read_sql(query, self.conn, params=[model_name])
+            df = self._execute_query(query, params=[model_name])
         else:
             query = base_query + " ORDER BY forecast_date"
-            df = pd.read_sql(query, self.conn)
+            df = self._execute_query(query)
 
         df["forecast_date"] = pd.to_datetime(df["forecast_date"])
         return df
@@ -93,7 +104,7 @@ class DatabaseConnector:
             FROM model_performance
             ORDER BY created_at DESC
         """
-        df = pd.read_sql(query, self.conn)
+        df = self._execute_query(query)
         df["training_date"] = pd.to_datetime(df["training_date"])
         return df
 
@@ -112,7 +123,7 @@ class DatabaseConnector:
                 AVG(close_price)   AS avg_close_price
             FROM gold_prices
         """
-        df = pd.read_sql(query, self.conn)
+        df = self._execute_query(query)
 
         return {
             "total_records": int(df.iloc[0]["total_records"]),
