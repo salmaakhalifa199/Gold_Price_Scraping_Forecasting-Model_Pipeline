@@ -451,7 +451,7 @@ def main():
                 unsafe_allow_html=True)
     st.markdown(
         '<p style="text-align: center; color: gray; font-size: 1.1rem;">'
-        'Powered by AI | Real-time Data Analysis & Predictions'
+        'Real-time Data Analysis & Predictions'
         '</p>',
         unsafe_allow_html=True
     )
